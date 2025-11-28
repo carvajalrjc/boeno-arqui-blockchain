@@ -1,0 +1,31 @@
+{
+  "name": "sistema-trazabilidad-blockchain",
+  "version": "1.0.0",
+  "description": "Sistema de Trazabilidad con Blockchain, Smart Contracts y Token ERC-20",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy/deploy.js --network besu",
+    "deploy:local": "npx hardhat run scripts/deploy/deploy.js --network besu",
+    "test": "npx hardhat test",
+    "clean": "npx hardhat clean",
+    "node": "npx hardhat node",
+    "seed": "node scripts/seed-data.js",
+    "seed:data": "node scripts/seed-data.js"
+  },
+  "keywords": [
+    "blockchain",
+    "smart-contracts",
+    "solidity",
+    "trazabilidad",
+    "erc20",
+    "hyperledger-besu"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  }
+}
+

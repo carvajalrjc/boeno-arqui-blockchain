@@ -1,0 +1,176 @@
+version: '3.8'
+
+services:
+  # ═══════════════════════════════════════════════════════════════════
+  # BLOCKCHAIN - NODO 1 (Bootnode/Validador)
+  # ═══════════════════════════════════════════════════════════════════
+  node1:
+    image: hyperledger/besu:latest
+    container_name: besu-node1
+    environment:
+      - BESU_OPTS=-Xmx512m
+    command: >
+      --data-path=/opt/besu/data
+      --genesis-file=/opt/besu/genesis.json
+      --node-private-key-file=/opt/besu/keys/key
+      --rpc-http-enabled=true
+      --rpc-http-api=ETH,NET,IBFT,WEB3,ADMIN,DEBUG,TXPOOL
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-http-cors-origins="*"
+      --rpc-ws-enabled=true
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --host-allowlist="*"
+      --min-gas-price=0
+      --p2p-host=0.0.0.0
+      --p2p-port=30303
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json:ro
+      - ./nodes/node1/data:/opt/besu/data
+      - ./nodes/node1/key:/opt/besu/keys/key:ro
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+      - "30303:30303"
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.11
+
+  # ═══════════════════════════════════════════════════════════════════
+  # BLOCKCHAIN - NODO 2 (Validador)
+  # ═══════════════════════════════════════════════════════════════════
+  node2:
+    image: hyperledger/besu:latest
+    container_name: besu-node2
+    environment:
+      - BESU_OPTS=-Xmx512m
+    command: >
+      --data-path=/opt/besu/data
+      --genesis-file=/opt/besu/genesis.json
+      --node-private-key-file=/opt/besu/keys/key
+      --rpc-http-enabled=true
+      --rpc-http-api=ETH,NET,IBFT,WEB3,ADMIN,DEBUG,TXPOOL
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-http-cors-origins="*"
+      --rpc-ws-enabled=true
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --host-allowlist="*"
+      --min-gas-price=0
+      --p2p-host=0.0.0.0
+      --p2p-port=30303
+      --bootnodes=enode://99a0cb504eab2599015f42d9bf38de73c83873e70dc60ae934318875b27ff94aac51ffb7c435298e9fb93455952bd07047f10da0db924ca1c2e9cf77220f57ec@172.16.239.11:30303
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json:ro
+      - ./nodes/node2/data:/opt/besu/data
+      - ./nodes/node2/key:/opt/besu/keys/key:ro
+    ports:
+      - "8555:8545"
+      - "8556:8546"
+      - "30304:30303"
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.12
+    depends_on:
+      - node1
+
+  # ═══════════════════════════════════════════════════════════════════
+  # BLOCKCHAIN - NODO 3 (Validador)
+  # ═══════════════════════════════════════════════════════════════════
+  node3:
+    image: hyperledger/besu:latest
+    container_name: besu-node3
+    environment:
+      - BESU_OPTS=-Xmx512m
+    command: >
+      --data-path=/opt/besu/data
+      --genesis-file=/opt/besu/genesis.json
+      --node-private-key-file=/opt/besu/keys/key
+      --rpc-http-enabled=true
+      --rpc-http-api=ETH,NET,IBFT,WEB3,ADMIN,DEBUG,TXPOOL
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-http-cors-origins="*"
+      --rpc-ws-enabled=true
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --host-allowlist="*"
+      --min-gas-price=0
+      --p2p-host=0.0.0.0
+      --p2p-port=30303
+      --bootnodes=enode://99a0cb504eab2599015f42d9bf38de73c83873e70dc60ae934318875b27ff94aac51ffb7c435298e9fb93455952bd07047f10da0db924ca1c2e9cf77220f57ec@172.16.239.11:30303
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json:ro
+      - ./nodes/node3/data:/opt/besu/data
+      - ./nodes/node3/key:/opt/besu/keys/key:ro
+    ports:
+      - "8565:8545"
+      - "8566:8546"
+      - "30305:30303"
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.13
+    depends_on:
+      - node1
+
+  # ═══════════════════════════════════════════════════════════════════
+  # BACKEND - API REST (Node.js + Express)
+  # ═══════════════════════════════════════════════════════════════════
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trazabilidad-backend
+    environment:
+      - PORT=3001
+      - NODE1_RPC=http://node1:8545
+      - NODE2_RPC=http://node2:8545
+      - NODE3_RPC=http://node3:8545
+      - PRIVATE_KEY=463e32b027c7e121290426decda8480ef6e84e65f70daf9ed1f3198eea9a6208
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.20
+    depends_on:
+      - node1
+      - node2
+      - node3
+    restart: unless-stopped
+
+  # ═══════════════════════════════════════════════════════════════════
+  # FRONTEND - React + Vite
+  # ═══════════════════════════════════════════════════════════════════
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: trazabilidad-frontend
+    environment:
+      - VITE_API_URL=http://localhost:3001/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.21
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+# ═══════════════════════════════════════════════════════════════════
+# RED
+# ═══════════════════════════════════════════════════════════════════
+networks:
+  besu-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.239.0/24

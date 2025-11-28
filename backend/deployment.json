@@ -1,0 +1,22 @@
+{
+  "network": "besu",
+  "chainId": 1337,
+  "deployer": "0xd244A0c23e0D032AC458E8f6C72eAa6D96a08fEf",
+  "deployedAt": "2025-11-28T01:49:57.518Z",
+  "contracts": {
+    "TrazaToken": {
+      "address": "0x0062B5149dBEC5dF0bE1c5f6ac538D65aD6d3FEc",
+      "symbol": "TRZ",
+      "decimals": 18,
+      "initialSupply": 1000000
+    },
+    "Trazabilidad": {
+      "address": "0xfB458aD9676a00336CD16bc7Af0baa21F18e698f"
+    }
+  },
+  "recompensas": {
+    "proveedor": "100 TRZ",
+    "producto": "50 TRZ",
+    "movimiento": "10 TRZ"
+  }
+}
